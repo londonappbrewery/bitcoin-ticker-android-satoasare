@@ -12,19 +12,26 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Toast;
 
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import cz.msebera.android.httpclient.entity.mime.Header;
 
 
 public class MainActivity extends AppCompatActivity {
 
     // Constants:
     // TODO: Create the base URL
-    private final String BASE_URL = "https://apiv2.bitcoin ...";
+    private final String BASE_URL = "https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC";
 
     // Member Variables:
     TextView mPriceTextView;
+    private String mPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,16 +52,52 @@ public class MainActivity extends AppCompatActivity {
         spinner.setAdapter(adapter);
 
         // TODO: Set an OnItemSelected listener on the spinner
+        spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("Bitcoin", " onItemSelected" + parent.getItemAtPosition(position));
 
+                letsDoSomeNetworking(BASE_URL + parent.getItemAtPosition(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                Log.d("Bicoin", "Nothing selected!");
+
+            }
+        });
     }
 
     // TODO: complete the letsDoSomeNetworking() method
     private void letsDoSomeNetworking(String url) {
 
-//        AsyncHttpClient client = new AsyncHttpClient();
-//        client.get(WEATHER_URL, params, new JsonHttpResponseHandler() {
-//
-//            @Override
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get(url, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, JSONObject response) {
+                //super.onSuccess(statusCode, headers, response);
+
+                Log.d("Bitcoin", "onSuccess: " + response.toString());
+
+                try {
+                    mPrice = response.getJSONObject("changes").getJSONObject("price").getString("year");
+                    //mPrice = response.getString("price");
+                    mPriceTextView.setText(mPrice);
+                } catch (JSONException pE) {
+                    pE.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+
+                Log.d("Bitcoin", "onFailure: " + throwable.toString());
+                Log.d("Bitcoin", "Status Code: " + statusCode);
+            }
+
+            //            @Override
 //            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 //                // called when response HTTP status is "200 OK"
 //                Log.d("Clima", "JSON: " + response.toString());
@@ -70,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 //                Log.e("ERROR", e.toString());
 //                Toast.makeText(WeatherController.this, "Request Failed", Toast.LENGTH_SHORT).show();
 //            }
-//        });
+        });
 
 
     }
