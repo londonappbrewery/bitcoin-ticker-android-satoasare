@@ -80,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("Bitcoin", "onSuccess: " + response.toString());
 
                 try {
-                    mPrice = response.getJSONObject("changes").getJSONObject("price").getString("year");
-                    //mPrice = response.getString("price");
+                    //mPrice = response.getJSONObject("changes").getJSONObject("price").getString("year");
+                    mPrice = response.getString("last");
                     mPriceTextView.setText(mPrice);
                 } catch (JSONException pE) {
                     pE.printStackTrace();
